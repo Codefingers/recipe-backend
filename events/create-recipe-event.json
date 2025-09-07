@@ -1,0 +1,15 @@
+{
+  "body": "{\"name\":\"Chocolate Cake\",\"ingredients\":[\"2 cups all-purpose flour\",\"2 cups sugar\",\"3/4 cup unsweetened cocoa powder\",\"2 teaspoons baking soda\",\"1 teaspoon salt\",\"2 eggs\",\"1 cup milk\",\"1/2 cup vegetable oil\",\"2 teaspoons vanilla extract\",\"1 cup boiling water\"],\"instructions\":[\"Preheat oven to 350°F (175°C).\",\"In a large bowl, combine flour, sugar, cocoa, baking soda, and salt.\",\"Add eggs, milk, oil, and vanilla. Beat on medium speed for 2 minutes.\",\"Stir in boiling water. Batter will be thin.\",\"Pour into a 9x13 inch baking pan.\",\"Bake for 30-35 minutes or until a toothpick inserted comes out clean.\"]}",
+  "headers": {},
+  "httpMethod": "POST",
+  "isBase64Encoded": false,
+  "path": "/recipes",
+  "pathParameters": null,
+  "queryStringParameters": null,
+  "requestContext": {},
+  "resource": "",
+  "stageVariables": null,
+  "multiValueHeaders": {},
+  "multiValueQueryStringParameters": null,
+  "resourcePath": ""
+} 

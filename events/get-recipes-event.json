@@ -1,0 +1,15 @@
+{
+  "body": null,
+  "headers": {},
+  "httpMethod": "GET",
+  "isBase64Encoded": false,
+  "path": "/recipes",
+  "pathParameters": null,
+  "queryStringParameters": null,
+  "requestContext": {},
+  "resource": "",
+  "stageVariables": null,
+  "multiValueHeaders": {},
+  "multiValueQueryStringParameters": null,
+  "resourcePath": ""
+} 
