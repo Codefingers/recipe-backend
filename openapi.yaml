@@ -1,0 +1,478 @@
+openapi: 3.0.3
+info:
+  title: Recipe Backend API
+  description: A serverless backend service for managing recipes, built with AWS CDK and TypeScript
+  version: 1.0.0
+  contact:
+    name: Recipe Backend API
+  license:
+    name: ISC
+servers:
+  - url: https://kgoq68r29f.execute-api.eu-west-1.amazonaws.com/prod
+    description: Production server
+paths:
+  /recipes:
+    get:
+      summary: Get all recipes
+      description: Retrieve all recipes from the database
+      operationId: getRecipes
+      tags:
+        - Recipes
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recipes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Recipe'
+              example:
+                recipes:
+                  - id: "recipe-123"
+                    title: "Chocolate Chip Cookies"
+                    description: "Delicious homemade chocolate chip cookies"
+                    imageUrl: "https://example.com/cookies.jpg"
+                    tags: ["dessert", "cookies", "baking"]
+                    rating: 5
+                    prepTime: "15 mins"
+                    cookTime: "12 mins"
+                    ingredients: ["2 cups flour", "1 cup sugar", "1/2 cup butter"]
+                    instructions: ["Mix dry ingredients", "Add wet ingredients", "Bake at 350°F"]
+                    authorId: "user-123"
+                    authorName: "John Doe"
+                    createdAt: "2024-01-15T10:30:00Z"
+                    updatedAt: "2024-01-15T10:30:00Z"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new recipe
+      description: Create a new recipe in the database
+      operationId: createRecipe
+      tags:
+        - Recipes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRecipeRequest'
+            example:
+              title: "Chocolate Chip Cookies"
+              description: "Delicious homemade chocolate chip cookies"
+              imageUrl: "https://example.com/cookies.jpg"
+              tags: ["dessert", "cookies", "baking"]
+              rating: 5
+              prepTime: "15 mins"
+              cookTime: "12 mins"
+              ingredients: ["2 cups flour", "1 cup sugar", "1/2 cup butter"]
+              instructions: ["Mix dry ingredients", "Add wet ingredients", "Bake at 350°F"]
+              authorId: "user-123"
+              authorName: "John Doe"
+      responses:
+        '201':
+          description: Recipe created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  recipe:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+              example:
+                message: "Recipe created successfully"
+                recipe:
+                  id: "recipe-123"
+                  createdAt: "2024-01-15T10:30:00Z"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    options:
+      summary: CORS preflight request
+      description: Handle CORS preflight requests
+      operationId: optionsRecipes
+      tags:
+        - Recipes
+      responses:
+        '200':
+          description: CORS preflight response
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+  /recipes/{id}:
+    get:
+      summary: Get a specific recipe
+      description: Retrieve a specific recipe by ID
+      operationId: getRecipe
+      tags:
+        - Recipes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The recipe ID
+          schema:
+            type: string
+          example: "recipe-123"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recipe:
+                    $ref: '#/components/schemas/Recipe'
+              example:
+                recipe:
+                  id: "recipe-123"
+                  title: "Chocolate Chip Cookies"
+                  description: "Delicious homemade chocolate chip cookies"
+                  imageUrl: "https://example.com/cookies.jpg"
+                  tags: ["dessert", "cookies", "baking"]
+                  rating: 5
+                  prepTime: "15 mins"
+                  cookTime: "12 mins"
+                  ingredients: ["2 cups flour", "1 cup sugar", "1/2 cup butter"]
+                  instructions: ["Mix dry ingredients", "Add wet ingredients", "Bake at 350°F"]
+                  authorId: "user-123"
+                  authorName: "John Doe"
+                  createdAt: "2024-01-15T10:30:00Z"
+                  updatedAt: "2024-01-15T10:30:00Z"
+        '400':
+          description: Bad request - Missing recipe ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Recipe not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update a recipe
+      description: Update an existing recipe
+      operationId: updateRecipe
+      tags:
+        - Recipes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The recipe ID
+          schema:
+            type: string
+          example: "recipe-123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRecipeRequest'
+            example:
+              title: "Updated Chocolate Chip Cookies"
+              description: "Even more delicious homemade chocolate chip cookies"
+              tags: ["dessert", "cookies", "baking", "updated"]
+              rating: 5
+      responses:
+        '200':
+          description: Recipe updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recipe:
+                    $ref: '#/components/schemas/Recipe'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Recipe not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    options:
+      summary: CORS preflight request
+      description: Handle CORS preflight requests
+      operationId: optionsRecipe
+      tags:
+        - Recipes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The recipe ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: CORS preflight response
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+components:
+  schemas:
+    Recipe:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - tags
+        - rating
+        - prepTime
+        - cookTime
+        - ingredients
+        - instructions
+        - authorId
+        - authorName
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the recipe
+          example: "recipe-123"
+        title:
+          type: string
+          description: The recipe title
+          example: "Chocolate Chip Cookies"
+        description:
+          type: string
+          description: A description of the recipe
+          example: "Delicious homemade chocolate chip cookies"
+        imageUrl:
+          type: string
+          description: URL to the recipe image
+          example: "https://example.com/cookies.jpg"
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags associated with the recipe
+          example: ["dessert", "cookies", "baking"]
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          description: Recipe rating from 1 to 5
+          example: 5
+        prepTime:
+          type: string
+          description: Preparation time
+          example: "15 mins"
+        cookTime:
+          type: string
+          description: Cooking time
+          example: "12 mins"
+        ingredients:
+          type: array
+          items:
+            type: string
+          description: List of ingredients
+          example: ["2 cups flour", "1 cup sugar", "1/2 cup butter"]
+        instructions:
+          type: array
+          items:
+            type: string
+          description: Step-by-step cooking instructions
+          example: ["Mix dry ingredients", "Add wet ingredients", "Bake at 350°F"]
+        authorId:
+          type: string
+          description: ID of the recipe author
+          example: "user-123"
+        authorName:
+          type: string
+          description: Name of the recipe author
+          example: "John Doe"
+        createdAt:
+          type: string
+          format: date-time
+          description: When the recipe was created
+          example: "2024-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the recipe was last updated
+          example: "2024-01-15T10:30:00Z"
+    CreateRecipeRequest:
+      type: object
+      required:
+        - title
+        - description
+        - tags
+        - rating
+        - prepTime
+        - cookTime
+        - ingredients
+        - instructions
+        - authorId
+        - authorName
+      properties:
+        title:
+          type: string
+          description: The recipe title
+          example: "Chocolate Chip Cookies"
+        description:
+          type: string
+          description: A description of the recipe
+          example: "Delicious homemade chocolate chip cookies"
+        imageUrl:
+          type: string
+          description: URL to the recipe image
+          example: "https://example.com/cookies.jpg"
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags associated with the recipe
+          example: ["dessert", "cookies", "baking"]
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          description: Recipe rating from 1 to 5
+          example: 5
+        prepTime:
+          type: string
+          description: Preparation time
+          example: "15 mins"
+        cookTime:
+          type: string
+          description: Cooking time
+          example: "12 mins"
+        ingredients:
+          type: array
+          items:
+            type: string
+          description: List of ingredients
+          example: ["2 cups flour", "1 cup sugar", "1/2 cup butter"]
+        instructions:
+          type: array
+          items:
+            type: string
+          description: Step-by-step cooking instructions
+          example: ["Mix dry ingredients", "Add wet ingredients", "Bake at 350°F"]
+        authorId:
+          type: string
+          description: ID of the recipe author
+          example: "user-123"
+        authorName:
+          type: string
+          description: Name of the recipe author
+          example: "John Doe"
+    UpdateRecipeRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The recipe title
+          example: "Updated Chocolate Chip Cookies"
+        description:
+          type: string
+          description: A description of the recipe
+          example: "Even more delicious homemade chocolate chip cookies"
+        imageUrl:
+          type: string
+          description: URL to the recipe image
+          example: "https://example.com/cookies.jpg"
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags associated with the recipe
+          example: ["dessert", "cookies", "baking", "updated"]
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          description: Recipe rating from 1 to 5
+          example: 5
+        prepTime:
+          type: string
+          description: Preparation time
+          example: "15 mins"
+        cookTime:
+          type: string
+          description: Cooking time
+          example: "12 mins"
+        ingredients:
+          type: array
+          items:
+            type: string
+          description: List of ingredients
+          example: ["2 cups flour", "1 cup sugar", "1/2 cup butter"]
+        instructions:
+          type: array
+          items:
+            type: string
+          description: Step-by-step cooking instructions
+          example: ["Mix dry ingredients", "Add wet ingredients", "Bake at 350°F"]
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: "Internal server error"
+tags:
+  - name: Recipes
+    description: Recipe management operations 
