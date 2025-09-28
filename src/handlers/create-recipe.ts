@@ -6,6 +6,13 @@ import { v4 as uuidv4 } from 'uuid';
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
+// CORS headers helper
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 interface Recipe {
   id: string;
   title: string;
@@ -26,12 +33,22 @@ interface Recipe {
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  // Handle preflight OPTIONS request
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: '',
+    };
+  }
+
   try {
     if (!event.body) {
       return {
         statusCode: 400,
         headers: {
           'Content-Type': 'application/json',
+          ...corsHeaders,
         },
         body: JSON.stringify({
           message: 'Missing request body',
@@ -80,6 +97,7 @@ export const handler = async (
       statusCode: 201,
       headers: {
         'Content-Type': 'application/json',
+        ...corsHeaders,
       },
       body: JSON.stringify({
         message: 'Recipe created successfully',
@@ -95,6 +113,7 @@ export const handler = async (
       statusCode: 500,
       headers: {
         'Content-Type': 'application/json',
+        ...corsHeaders,
       },
       body: JSON.stringify({
         message: 'Internal server error',

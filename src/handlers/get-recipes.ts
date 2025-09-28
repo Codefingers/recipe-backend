@@ -5,9 +5,25 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
+// CORS headers helper
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  // Handle preflight OPTIONS request
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: '',
+    };
+  }
+
   try {
     const command = new ScanCommand({
       TableName: process.env.TABLE_NAME,
@@ -19,6 +35,7 @@ export const handler = async (
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
+        ...corsHeaders,
       },
       body: JSON.stringify({
         recipes: response.Items,
@@ -30,6 +47,7 @@ export const handler = async (
       statusCode: 500,
       headers: {
         'Content-Type': 'application/json',
+        ...corsHeaders,
       },
       body: JSON.stringify({
         message: 'Internal server error',
