@@ -10,7 +10,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "cdk": "cdk",
-    "deploy": "cdk deploy",
+    "deploy": "COGNITO_USER_POOL_ID=eu-west-1_oO2Nc7wsP && cdk deploy",
     "destroy": "cdk destroy",
     "test": "vitest",
     "synth": "cdk synth",

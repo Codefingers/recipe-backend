@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as path from 'path';
@@ -25,7 +26,11 @@ export class RecipeBackendStack extends cdk.Stack {
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
-        allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+        allowHeaders: [
+          'Content-Type',
+          'Cache-Control',
+          'Authorization',
+        ],
       },
     });
 
@@ -38,6 +43,19 @@ export class RecipeBackendStack extends cdk.Stack {
         limit: 500,
         period: apigateway.Period.DAY,
       },
+    });
+
+    // Import existing Cognito User Pool and set up an authorizer
+    const userPoolId = process.env.COGNITO_USER_POOL_ID;
+    if (!userPoolId) {
+      throw new Error('COGNITO_USER_POOL_ID environment variable must be set when deploying RecipeBackendStack');
+    }
+
+    const userPool = cognito.UserPool.fromUserPoolId(this, 'RecipesUserPool', userPoolId);
+
+    const authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'RecipesAuthorizer', {
+      cognitoUserPools: [userPool],
+      identitySource: 'method.request.header.Authorization',
     });
 
     // Create Lambda functions
@@ -89,10 +107,14 @@ export class RecipeBackendStack extends cdk.Stack {
       new apigateway.LambdaIntegration(getRecipesFunction)
     );
 
-    // POST /recipes
+    // POST /recipes (requires authenticated user)
     recipes.addMethod(
       'POST',
-      new apigateway.LambdaIntegration(createRecipeFunction)
+      new apigateway.LambdaIntegration(createRecipeFunction),
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      },
     );
 
     // GET /recipes/{id}
@@ -102,10 +124,14 @@ export class RecipeBackendStack extends cdk.Stack {
       new apigateway.LambdaIntegration(getRecipeFunction)
     );
 
-    // PUT /recipes/{id}
+    // PUT /recipes/{id} (requires authenticated user)
     recipe.addMethod(
       'PUT',
-      new apigateway.LambdaIntegration(updateRecipeFunction)
+      new apigateway.LambdaIntegration(updateRecipeFunction),
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      },
     );
 
     // Output the API URL
