@@ -92,11 +92,20 @@ export class RecipeBackendStack extends cdk.Stack {
       },
     });
 
+    const deleteRecipeFunction = new NodejsFunction(this, 'DeleteRecipeFunction', {
+      entry: path.join(__dirname, '../src/handlers/delete-recipe.ts'),
+      runtime: lambda.Runtime.NODEJS_22_X,
+      environment: {
+        TABLE_NAME: table.tableName,
+      },
+    });
+
     // Grant DynamoDB permissions to Lambda functions
     table.grantReadData(getRecipesFunction);
     table.grantReadData(getRecipeFunction);
     table.grantWriteData(createRecipeFunction);
     table.grantReadWriteData(updateRecipeFunction);
+    table.grantWriteData(deleteRecipeFunction);
 
     // Create API endpoints
     const recipes = api.root.addResource('recipes');
@@ -128,6 +137,16 @@ export class RecipeBackendStack extends cdk.Stack {
     recipe.addMethod(
       'PUT',
       new apigateway.LambdaIntegration(updateRecipeFunction),
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      },
+    );
+
+    // DELETE /recipes/{id} (requires authenticated user)
+    recipe.addMethod(
+      'DELETE',
+      new apigateway.LambdaIntegration(deleteRecipeFunction),
       {
         authorizer,
         authorizationType: apigateway.AuthorizationType.COGNITO,
